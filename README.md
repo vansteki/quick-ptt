@@ -14,8 +14,6 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
     gem install json
   
     ruby 8gua.rb [PTT帳號] [密碼]
-    
-##demo
 
 
     
