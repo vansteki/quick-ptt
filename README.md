@@ -6,7 +6,7 @@
 
 http://godspeedlee.myweb.hinet.net/
 
-##版本
+##Ruby 版本
 ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
   
 ##使用方法
@@ -19,12 +19,16 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
 ##注意事項!
 
-*使用Ruby1.9.X 要注意檔案utf8的問題 和 正規表示要修改
+###使用Ruby1.9.X 要注意檔案utf8的問題 和 [正規表示要修改] (http://goo.gl/FQr2W)
 
-*請勿使用本程式於非法行為，此程式僅供教學研究用途。
+  檔案utf8的問題: 請在檔案最上方插入此行　
+     
+    #encoding: utf-8
+
+###請勿使用本程式於非法行為，此程式僅供教學研究用途。
 
 
-##Intro
+##Ruby Version
 
 A crawer use Ruby net/telnet to fetch article list of board 'Gossiping' of PTT.CC. (4Chat.com of Taiwan)
 
