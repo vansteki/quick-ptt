@@ -55,4 +55,7 @@ sudo gem install magic_encoding, then just call magic_encoding from the root of 
 ###regular expression problem
   
 http://goo.gl/FQr2W
+
+####
+  This project is only for education and research. Do not abuse it on illegal behavior.
       
