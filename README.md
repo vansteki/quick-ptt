@@ -17,6 +17,13 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
 登入成功後就會開始跳至八卦版爬文了!
 
+##注意事項!
+
+*使用Ruby1.9.X 要注意檔案utf8的問題 和 正規表示要修改
+
+*請勿使用本程式於非法行為，此程式僅供教學研究用途。
+
+
 ##Intro
 
 A crawer use Ruby net/telnet to fetch article list of board 'Gossiping' of PTT.CC. (4Chat.com of Taiwan)
@@ -34,5 +41,18 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
 enjoy it :)
     
-    
+##Notice!
+
+If you use Ruby1.9.X , you may have to fix some problem:
+
+###UTF-8 problem:
+
+Write #encoding: utf-8 on top of that file
+  
+sudo gem install magic_encoding, then just call magic_encoding from the root of your app.
+
+  
+###regular expression problem
+  
+http://goo.gl/FQr2W
       
