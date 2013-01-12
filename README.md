@@ -19,9 +19,9 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
 ##Intro
 
-A crawer to fetch article list of PTT.CC. (JSON output)
+A crawer use Ruby net/telnet to fetch article list of board 'Gossiping' of PTT.CC. (4Chat.com of Taiwan)
 
-Use Ruby net/telnet.
+JSON outputed. 
 
 ##Env
 ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
