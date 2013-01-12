@@ -51,7 +51,9 @@ If you use Ruby1.9.X , you may have to fix some problem:
 
 ###UTF-8 problem:
 
-Write #encoding: utf-8 on top of that file
+Write this line on top of that file
+
+    #encoding: utf-8
   
 sudo gem install magic_encoding, then just call magic_encoding from the root of your app.
 
