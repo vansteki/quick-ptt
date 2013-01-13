@@ -22,7 +22,7 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 ###其他設定
 
     $host             主機IP或名稱
-    $board_name       英文板名　
+    $board_name       板名(英文)，預設為 Gossiping　
     $json_opt_path    輸出檔的路徑及檔名，若沒指定則預設值為 ./index.html　
 
 
