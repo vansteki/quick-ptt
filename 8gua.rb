@@ -2,7 +2,6 @@ require 'rubygems'
 require 'json'
 require 'net/telnet'
 require 'pp'
-require "msgpack"
 
 AnsiSetDisplayAttr = '\x1B\[(?>(?>(?>\d+;)*\d+)?)m'
 WaitForInput =  '(?>\s+)(?>\x08+)'
