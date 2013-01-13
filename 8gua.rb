@@ -17,9 +17,9 @@ PressAnyKeyToContinue2 = "\\[#{PressAnyKey}\\](?>\\s*)#{AnsiSetDisplayAttr}"
 ArticleList = '\(b\)' + "#{AnsiSetDisplayAttr}" + '\xB6\x69\xAA\x4F\xB5\x65\xAD\xB1\s*' + "#{AnsiSetDisplayAttr}#{AnsiCursorHome}"
 Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 
-$site = 'ptt.cc'
+$host = 'ptt.cc'
 $board_name = 'Gossiping'
-$json_opt_path = '/var/www/index.html'
+$json_opt_path = 'C:\xampp-portable\htdocs\index.html'
 
 def connect(port, time_out, wait_time, host)
 	tn = Net::Telnet.new(
@@ -173,33 +173,8 @@ def now_time()
 	return now_time = time.strftime("%Y-%m-%d %H:%M:%S")
 end
 
-def leave_to_next_article(tn)
-	tn.print('q')
-	tn.print('k')
-	tn.print("\n")
-end
-
 def page_down()
 	tn.print("\e[6~")
-end
-
-def make_list(s, list)
-	s.scan(/\s+\xA7\x40\xAA\xCC\s+(.*)\s+\(.*\).*\s*\xBC\xD0\xC3\x44\s+(.+\S)\s+\xAE\xC9\xB6\xA1\s+\w+\s+(\w+)\s+(\d+).*(\d\d\d\d)/){
-	|author, title, month, day, year| list.push("author"=>author, "title"=>title, "month"=>convert_month(month), "day"=>day, "year"=>year)}
-	return list
-end
-
-def demo_list()
-	tn = connect(23, 5, 1, $site)
-	login(tn, ARGV[0], ARGV[1])
-	result = jump_board(tn, $board_name)
-	arr = get_article_list(result)
-	#system('cls')
-	dump_json(arr)
-
-	while (1)
-		keep_check_board(tn)
-	end
 end
 
 def dump_json(arr)
@@ -212,6 +187,19 @@ end
 
 def log(log, file_name="index.html")
 	File.open("#{file_name}","w+") do |f| f.puts log end
+end
+
+def demo_list()
+	tn = connect(23, 5, 1, $host)
+	login(tn, ARGV[0], ARGV[1])
+	result = jump_board(tn, $board_name)
+	arr = get_article_list(result)
+	#system('cls')
+	dump_json(arr)
+
+	while (1)
+		keep_check_board(tn)
+	end
 end
 
 if ARGV.size != 2 then
