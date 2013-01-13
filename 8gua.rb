@@ -91,11 +91,11 @@ def get_article_list(s)
 	# 分類
 	(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
 	# 主題
-	(?>\s*)(\S*|\S*\s*\S*)
+	(?>\s*)(\S*|\?$|\xA8\xF6$)
 	/x){
 		|num, push_stat, push_num, date, author, mark, type, title, d|	list.push("article_id"=>num, "push_stat"=>push_stat, "push_num"=>push_num, "date"=>date, "author"=>author,"mark"=>mark, "type"=>type, "title"=>dash_checker(title) ) # 儲存文章編號與作者帳號 etc...
 	}
-	return list #(?>\s*)(\S*|#{Big5Code}*|[\x3\xF0]$|\?$|[\xA8\xF6]$)
+	return list 
 end
 
 def search_by_title(tn, title)
