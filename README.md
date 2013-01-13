@@ -19,6 +19,13 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
 登入成功後就會開始跳至八卦板爬文了! enjoy it :)
 
+###其他設定
+
+    $host             主機IP或名稱
+    $board_name       英文板名　
+    $json_opt_path    輸出檔的路徑及檔名，若沒指定則預設值為 ./index.html　
+
+
 ##注意事項!
 
 ###使用Ruby1.9.X 要注意檔案utf8的問題 和 [正規表示要修改] (http://goo.gl/FQr2W)
@@ -47,7 +54,13 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
     ruby 8gua.rb [your PTT ID] [PASS]
 
 enjoy it :)
-    
+
+###Config
+
+    $host             host IP/domain name       
+    $board_name       board name (English)　
+    $json_opt_path    Output path & file name, default is ./index.html　
+
 ##Notice!
 
 If you use Ruby1.9.X , you may have to fix some problem:
