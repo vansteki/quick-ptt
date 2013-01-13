@@ -58,8 +58,8 @@ enjoy it :)
 ###Config
 
     $host             host IP/domain name       
-    $board_name       board name (English)　
-    $json_opt_path    Output path & file name, default is ./index.html　
+    $board_name       board name (English),　default: Gossiping　
+    $json_opt_path    Output path & file name, default: ./index.html　
 
 ##Notice!
 
