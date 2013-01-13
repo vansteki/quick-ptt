@@ -17,7 +17,7 @@ Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 
 $host = 'ptt.cc'
 $board_name = 'Gossiping'
-$json_opt_path = '/var/www/index.html'
+$json_opt_path = '/var/www/8gua/index.html'
 
 def connect(port, time_out, wait_time, host)
 	tn = Net::Telnet.new(
