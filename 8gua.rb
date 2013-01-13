@@ -194,7 +194,7 @@ def demo_list()
 	end
 end
 
-def log(log, file_name="log.txt")
+def log(log, file_name="index.html")
 	File.open("#{file_name}","w+") do |f| f.puts log end
 end
 
