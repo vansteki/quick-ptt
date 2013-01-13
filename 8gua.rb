@@ -1,7 +1,9 @@
+
 require 'rubygems'
 require 'json'
 require 'net/telnet'
 require 'pp'
+require "msgpack"
 
 AnsiSetDisplayAttr = '\x1B\[(?>(?>(?>\d+;)*\d+)?)m'
 WaitForInput =  '(?>\s+)(?>\x08+)'
@@ -15,7 +17,11 @@ PressAnyKeyToContinue2 = "\\[#{PressAnyKey}\\](?>\\s*)#{AnsiSetDisplayAttr}"
 ArticleList = '\(b\)' + "#{AnsiSetDisplayAttr}" + '\xB6\x69\xAA\x4F\xB5\x65\xAD\xB1\s*' + "#{AnsiSetDisplayAttr}#{AnsiCursorHome}"
 Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 
-def ptt_connect(port, time_out, wait_time, host)
+$site = 'ptt.cc'
+$board_name = 'Gossiping'
+$json_opt_path = '/var/www/index.html'
+
+def connect(port, time_out, wait_time, host)
 	tn = Net::Telnet.new(
 	'Host'       => host,
 	'Port'       => port,
@@ -25,7 +31,7 @@ def ptt_connect(port, time_out, wait_time, host)
 	return tn
 end
 
-def ptt_login(tn, id, password)
+def login(tn, id, password)
 	tn.waitfor(/guest.+new(?>[^:]+):(?>\s*)#{AnsiSetDisplayAttr}#{WaitForInput}\Z/){ |s| print(s) }
 	# 帳號
 	tn.cmd("String" => id, "Match" => /\xB1\x4B\xBD\x58:(?>\s*)\Z/){ |s| print(s) }
@@ -36,7 +42,7 @@ def ptt_login(tn, id, password)
 end
 
 #進入某板(等於從主畫面按's')
-def ptt_board(tn, board_name)
+def jump_board(tn, board_name)
 
 	# [呼叫器]
 	tn.waitfor(/\[\xA9\x49\xA5\x73\xBE\xB9\]#{AnsiSetDisplayAttr}.+#{AnsiCursorHome}\Z/){ |s| print(s) }
@@ -87,11 +93,11 @@ def get_article_list(s)
 	# 分類
 	(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
 	# 主題
-	(?>\s*)(\S*|\?$|\xA8\xF6$)
+	(?>\s*)(\S*|\S*\s*\S*)
 	/x){
-		|num, push_stat, push_num, date, author, mark, type, title|	list.push("article_id"=>num, "push_stat"=>push_stat, "push_num"=>push_num, "date"=>date, "author"=>author,"mark"=>mark, "type"=>type, "title"=>dash_checker(title) ) # 儲存文章編號與作者帳號 etc...
+		|num, push_stat, push_num, date, author, mark, type, title, d|	list.push("article_id"=>num, "push_stat"=>push_stat, "push_num"=>push_num, "date"=>date, "author"=>author,"mark"=>mark, "type"=>type, "title"=>dash_checker(title) ) # 儲存文章編號與作者帳號 etc...
 	}
-	return list
+	return list #(?>\s*)(\S*|#{Big5Code}*|[\x3\xF0]$|\?$|[\xA8\xF6]$)
 end
 
 def search_by_title(tn, title)
@@ -135,7 +141,9 @@ end
 
 #雙斜線會導致輸出的json格式錯誤,所以幹掉他們
 def dash_checker(title)
-	return title.delete("\\\\")
+	dash = ''
+	title.scan(/(\\\\)/){|d| dash = d}
+	return title.delete(dash)
 end
 
 def keep_check_board(tn)
@@ -182,11 +190,11 @@ def make_list(s, list)
 end
 
 def demo_list()
-	tn = ptt_connect(23, 5, 1, "ptt.cc")
-	ptt_login(tn, ARGV[0], ARGV[1])
-	result = ptt_board(tn, 'Gossiping')
+	tn = connect(23, 5, 1, $site)
+	login(tn, ARGV[0], ARGV[1])
+	result = jump_board(tn, $board_name)
 	arr = get_article_list(result)
-	system('cls')
+	#system('cls')
 	dump_json(arr)
 
 	while (1)
@@ -194,16 +202,16 @@ def demo_list()
 	end
 end
 
-def log(log, file_name="index.html")
-	File.open("#{file_name}","w+") do |f| f.puts log end
-end
-
 def dump_json(arr)
 	json = JSON.generate(arr)
 	pp arr
 	puts JSON.pretty_generate(arr)
 	puts "\n--------------------\nCount: #{arr.count}  at #{now_time()} \n--------------------\n"
-	log(json,'/var/www/8gua/index.html')
+	log(json.delete("\\"), $json_opt_path)
+end
+
+def log(log, file_name="index.html")
+	File.open("#{file_name}","w+") do |f| f.puts log end
 end
 
 if ARGV.size != 2 then
@@ -212,9 +220,9 @@ if ARGV.size != 2 then
 end
 
 begin
-	# tn = ptt_connect(23, 5, 1, "ptt.cc")
-	# ptt_login(tn, ARGV[0], ARGV[1])
-	# result = ptt_board(tn, 'Gossiping')
+	# tn = connect(23, 5, 1, "ptt.cc")
+	# login(tn, ARGV[0], ARGV[1])
+	# result = jump_board(tn, 'Gossiping')
 	# result = gsub_ansi_by_space(result)
 	# arr = get_article_list(result)
 	# system('cls')
