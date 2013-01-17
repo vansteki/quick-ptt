@@ -102,7 +102,7 @@ def get_article_list(s)
 		"author"=> big5_2_utf8(author),
 		"mark"=> big5_2_utf8(mark), 
 		"type"=> big5_2_utf8(type), 
-		"title"=> big5_2_utf8(dash_checker(title))) # 儲存文章編號與作者帳號 etc...
+		"title"=> big5_2_utf8(mine_checker(title))) # 儲存文章編號與作者帳號 etc...
 	}
 	return list 
 end
@@ -153,10 +153,8 @@ def convert_month(month)
 end
 
 #雙斜線會導致輸出的json格式錯誤,所以幹掉他們
-def dash_checker(title)
-	dash = ''
-	title.scan(/(\\\\)/){|d| dash = d}
-	return title.delete(dash)
+def mine_checker(data)
+	return data.delete(data.scan(/(\\\\)/){|d| res = d}).to_s.gsub(/"/, "'")
 end
 
 def keep_check_board(tn)
