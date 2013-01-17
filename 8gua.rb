@@ -2,6 +2,7 @@ require 'rubygems'
 require 'json'
 require 'net/telnet'
 require 'pp'
+require 'iconv'
 
 AnsiSetDisplayAttr = '\x1B\[(?>(?>(?>\d+;)*\d+)?)m'
 WaitForInput =  '(?>\s+)(?>\x08+)'
@@ -93,7 +94,15 @@ def get_article_list(s)
 	# 主題
 	(?>\s*)(\S*|\?$|\xA8\xF6$)
 	/x){
-		|num, push_stat, push_num, date, author, mark, type, title, d|	list.push("article_id"=>num, "push_stat"=>push_stat, "push_num"=>push_num, "date"=>date, "author"=>author,"mark"=>mark, "type"=>type, "title"=>dash_checker(title) ) # 儲存文章編號與作者帳號 etc...
+		|num, push_stat, push_num, date, author, mark, type, title, d|	list.push(
+		"article_id"=> num, 
+		"push_stat"=> big5_2_utf8(push_stat), 
+		"push_num"=> push_num, 
+		"date"=> date, 
+		"author"=> big5_2_utf8(author),
+		"mark"=> big5_2_utf8(mark), 
+		"type"=> big5_2_utf8(type), 
+		"title"=> big5_2_utf8(dash_checker(title))) # 儲存文章編號與作者帳號 etc...
 	}
 	return list 
 end
@@ -103,6 +112,12 @@ def search_by_title(tn, title)
 	tn.waitfor(/\xB7\x6A\xB4\x4D\xBC\xD0\xC3\x44:\s*#{AnsiCursorHome}#{AnsiSetDisplayAttr}\s+#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s| print(s) }
 	result = tn.cmd( 'String' => title, 'Match' => /#{ArticleList}/){ |s| print(s) }
 	return result
+end
+
+def big5_2_utf8(data)
+	#data = dash_checker(data)
+	ic = Iconv.new("utf-8//IGNORE","big5")
+	return ic.iconv(data.to_s)
 end
 
 def convert_month(month)
