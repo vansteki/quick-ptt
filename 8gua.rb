@@ -154,7 +154,8 @@ end
 
 #雙斜線會導致輸出的json格式錯誤,所以幹掉他們
 def mine_checker(data)
-	ddash = data.scan(/(\\\\)/){|d| res = d}
+	ddash = ''
+	data.scan(/(\\\\)/){|d| ddash = d}
 	return data.delete(ddash).to_s.gsub(/"/, "'")
 end
 
