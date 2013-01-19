@@ -84,15 +84,15 @@ def get_article_list(s)
 	# 推文數量
 	(?>\s*)(\xC3\x7A|\+\xC3\x7A|s\xC3\x7A|S\xC3\x7A|\s*\d*|' ')
 	# 日期
-	(?>\s*)(?>\s*)(\d\d\/\d\d|\d\/\d\d|\d\/\d|\d\/\d\d)
+	(?>\s*)(?>\s*)(\d*\/\d+)
 	# 帳號
 	(?>\s*)(?!(?>\d+\s))(\w{2,})\s+
 	# 文章標記
 	(?>\s*)(\xA1\xBC|R:|\xC2\xE0)
 	# 分類
-	(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
+	(?>\s*)(\[\S*\])
 	# 主題
-	(?>\s*)(\S*|\?$|\xA8\xF6$)
+	(?>\s*)(.*)
 	/x){
 		|num, push_stat, push_num, date, author, mark, type, title, d|	list.push(
 		"article_id"=> num, 
@@ -102,7 +102,7 @@ def get_article_list(s)
 		"author"=> big5_2_utf8(author),
 		"mark"=> big5_2_utf8(mark), 
 		"type"=> big5_2_utf8(type), 
-		"title"=> big5_2_utf8(mine_checker(title))) # 儲存文章編號與作者帳號 etc...
+		"title"=> big5_2_utf8(mine_checker(title.gsub(/\xA1\xB9.*/,''))))
 	}
 	return list 
 end
@@ -114,49 +114,19 @@ def search_by_title(tn, title)
 	return result
 end
 
-def big5_2_utf8(data)
-	#data = dash_checker(data)
+def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
+	begin
 	ic = Iconv.new("utf-8//IGNORE","big5")
-	return ic.iconv(data.to_s)
-end
-
-def convert_month(month)
-	$m =  month
-	case $m
-	when 'Jan'
-		return 1
-	when 'Feb'
-		return 2
-	when 'Mar'
-		return 3
-	when 'Apr'
-		return 4
-	when 'May'
-		return 5
-	when 'Jun'
-		return 6
-	when 'Jul'
-		return 7
-	when 'Aug'
-		return 8
-	when 'Sep'
-		return 9
-	when 'Oct'
-		return 10
-	when 'Nov'
-		return 11
-	when 'Dec'
-		return 12
-	else
-		return 0
+	data = ic.iconv(data.to_s)
+	rescue
+		pute "\n iconv error \n"
+	ensure
+		return  data
 	end
 end
 
-#雙斜線會導致輸出的json格式錯誤,所以幹掉他們
 def mine_checker(data)
-	ddash = ''
-	data.scan(/(\\\\)/){|d| ddash = d}
-	return data.delete(ddash).to_s.gsub(/"/, "'")
+	return data.delete("\\\\").to_s.gsub(/"/, "'")
 end
 
 def keep_check_board(tn)
@@ -166,28 +136,18 @@ def keep_check_board(tn)
 	tn.print("\n")
 	sleep(1)
 
-	screen = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| print(s) }
-	result = gsub_ansi_by_space(screen)
-	arr = get_article_list(result)
+	result = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| print(s) }
+	result = line_me(result)
+	result = gsub_ansi_by_space(result)
 	puts result
-	sleep(1)
+	arr = get_article_list(result)
 	dump_json(arr)
 	tn.print("\e[4~")
-end
-
-def search_by_hot(tn, number)
-	tn.print('Z')
-	tn.print("#{number}")
-	tn.print("\n")
 end
 
 def now_time()
 	time = Time.new
 	return now_time = time.strftime("%Y-%m-%d %H:%M:%S")
-end
-
-def page_down()
-	tn.print("\e[6~")
 end
 
 def dump_json(arr)
@@ -202,12 +162,21 @@ def log(log, file_name="index.html")
 	File.open("#{file_name}","w+") do |f| f.puts log end
 end
 
+def line_me(s)
+	s.gsub!(/\d\d\d\d\d/) do |m|
+		"\n#{m}"
+	end
+
+end
+
 def demo_list()
 	tn = connect(23, 5, 1, $host)
 	login(tn, ARGV[0], ARGV[1])
 	result = jump_board(tn, $board_name)
+	result = line_me(result)
+	result = gsub_ansi_by_space(result)
+	puts result
 	arr = get_article_list(result)
-	#system('cls')
 	dump_json(arr)
 
 	while (1)
@@ -221,14 +190,6 @@ if ARGV.size != 2 then
 end
 
 begin
-	# tn = connect(23, 5, 1, "ptt.cc")
-	# login(tn, ARGV[0], ARGV[1])
-	# result = jump_board(tn, 'Gossiping')
-	# result = gsub_ansi_by_space(result)
-	# arr = get_article_list(result)
-	# system('cls')
-	# pp arr
-
 	demo_list()
 end
 
