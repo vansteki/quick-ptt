@@ -18,7 +18,7 @@ Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 
 $host = 'ptt.cc'
 $board_name = 'Gossiping'
-$json_opt_path = '/var/www/8gua/index.html'
+$json_opt_path = 'C:\xampp-portable\htdocs\index.html'
 
 def connect(port, time_out, wait_time, host)
 	tn = Net::Telnet.new(
@@ -63,14 +63,16 @@ def jump_board(tn, board_name)
 end
 
 def gsub_ansi_by_space(s)
-	raise ArgumentError, "search_by_title() invalid title:" unless s.kind_of? String
-
+	begin
 	s.gsub!(/\x1B\[(?:(?>(?>(?>\d+;)*\d+)?)m|(?>(?>\d+;\d+)?)H|K)/) do |m|
 		if m[m.size-1].chr == 'K'
 			"\n"
 		else
 			" "
 		end
+	end
+	rescue
+		puts "\n----gsub_ansi_by_space erro: ---\n #{s} \n"
 	end
 end
 
@@ -90,19 +92,23 @@ def get_article_list(s)
 	# 文章標記
 	(?>\s*)(\xA1\xBC|R:|\xC2\xE0)
 	# 分類
-	(?>\s*)(\[\S*\])
+	(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
 	# 主題
 	(?>\s*)(.*)
 	/x){
-		|num, push_stat, push_num, date, author, mark, type, title, d|	list.push(
-		"article_id"=> num, 
-		"push_stat"=> big5_2_utf8(push_stat), 
-		"push_num"=> push_num, 
+		|articleID, pushStatus, pushCount, date, author, mark, type, title|	
+		fullLIst = articleID + ' ' + pushStatus + ' ' + pushCount + ' ' + date + ' ' + 	author + ' ' + mark + ' ' + type + ' ' + title
+		list.push(
+		"fullLIst"=> big5_2_utf8(fullLIst),
+		"articleID"=> articleID, 
+		"pushStatus"=> big5_2_utf8(pushStatus), 
+		"pushCount"=> pushCount, 
 		"date"=> date, 
 		"author"=> big5_2_utf8(author),
 		"mark"=> big5_2_utf8(mark), 
 		"type"=> big5_2_utf8(type), 
-		"title"=> big5_2_utf8(mine_checker(title.gsub(/\xA1\xB9.*/,''))))
+		"title"=> big5_2_utf8(mine_checker(title.gsub(/★.*|\xA4\xBD\xA7\x69.*/,'')))
+		)
 	}
 	return list 
 end
@@ -137,8 +143,8 @@ def keep_check_board(tn)
 	sleep(1)
 
 	result = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| print(s) }
-	result = line_me(result)
 	result = gsub_ansi_by_space(result)
+	result = line_me(result)
 	puts result
 	arr = get_article_list(result)
 	dump_json(arr)
@@ -155,7 +161,7 @@ def dump_json(arr)
 	pp arr
 	puts JSON.pretty_generate(arr)
 	puts "\n--------------------\nCount: #{arr.count}  at #{now_time()} \n--------------------\n"
-	log(json.delete("\\"), $json_opt_path)
+	log(json, $json_opt_path)
 end
 
 def log(log, file_name="index.html")
@@ -170,11 +176,11 @@ def line_me(s)
 end
 
 def demo_list()
-	tn = connect(23, 5, 1, $host)
+	tn = connect(23, 10, 1, $host)
 	login(tn, ARGV[0], ARGV[1])
 	result = jump_board(tn, $board_name)
-	result = line_me(result)
 	result = gsub_ansi_by_space(result)
+	result = line_me(result)
 	puts result
 	arr = get_article_list(result)
 	dump_json(arr)
@@ -192,5 +198,3 @@ end
 begin
 	demo_list()
 end
-
-
