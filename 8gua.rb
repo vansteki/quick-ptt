@@ -102,7 +102,7 @@ def get_article_list(s)
 		"fullLIst"=> big5_2_utf8(fullLIst),
 		"articleID"=> articleID, 
 		"pushStatus"=> big5_2_utf8(pushStatus), 
-		"pushCount"=> pushCount, 
+		"pushCount"=> big5_2_utf8(pushCount), 
 		"date"=> date, 
 		"author"=> big5_2_utf8(author),
 		"mark"=> big5_2_utf8(mark), 
@@ -111,13 +111,6 @@ def get_article_list(s)
 		)
 	}
 	return list 
-end
-
-def search_by_title(tn, title)
-	tn.print('?')
-	tn.waitfor(/\xB7\x6A\xB4\x4D\xBC\xD0\xC3\x44:\s*#{AnsiCursorHome}#{AnsiSetDisplayAttr}\s+#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s| print(s) }
-	result = tn.cmd( 'String' => title, 'Match' => /#{ArticleList}/){ |s| print(s) }
-	return result
 end
 
 def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
@@ -172,7 +165,6 @@ def line_me(s)
 	s.gsub!(/\d\d\d\d\d/) do |m|
 		"\n#{m}"
 	end
-
 end
 
 def demo_list()
