@@ -99,7 +99,7 @@ def get_article_list(s)
 		(?>\s*)(.*)
 		/x){
 			|articleID, pushStatus, pushCount, date, author, mark, type, title|
-			title = title.gsub(/\xA1\xB9.*/,'')
+			title = mine_checker(title)
 			fullLIst = articleID + ' ' + pushStatus + ' ' + pushCount + ' ' + date + ' ' + 	author + ' ' + mark + ' ' + type + ' ' + title
 
 			list.push(
@@ -111,7 +111,7 @@ def get_article_list(s)
 			"author"=> big5_2_utf8(author),
 			"mark"=> big5_2_utf8(mark),
 			"type"=> big5_2_utf8(type),
-			"title"=> big5_2_utf8(mine_checker(title))
+			"title"=> big5_2_utf8(title)
 			)
 		}
 	rescue
@@ -121,28 +121,8 @@ def get_article_list(s)
 	end
 end
 
-def down(tn)
-    tn.print("j")
-end
-
-def up(tn)
-    tn.print("k")
-end
-
-def top(tn)
-    tn.print("\e[1~")
-end
-
 def bottom(tn)
     tn.print("\e[4~")
-end
-
-def page_up(tn)
-    tn.print("\e[5~")
-end
-
-def page_down(tn)
-    tn.print("\e[6~")
 end
 
 def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
@@ -157,7 +137,7 @@ def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
 end
 
 def mine_checker(data)
-	return data.delete("\\\\").to_s.gsub(/"/, "'")
+	return data.delete("\\\\").to_s.gsub(/"/, "'").gsub(/\xA1\xB9.*/,'')
 end
 
 def now_time()
