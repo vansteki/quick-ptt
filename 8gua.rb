@@ -19,6 +19,7 @@ Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 $host = 'ptt.cc'
 $board_name = 'Gossiping'
 $json_opt_path = 'C:\xampp-portable\htdocs\index.html'
+$pre_result = ''
 
 def connect(port, time_out, wait_time, host)
 	tn = Net::Telnet.new(
@@ -44,9 +45,9 @@ end
 def jump_board(tn, board_name)
 
 	# [呼叫器]
-	tn.waitfor(/\[\xA9\x49\xA5\x73\xBE\xB9\]#{AnsiSetDisplayAttr}.+#{AnsiCursorHome}\Z/){ |s| print(s) }
+	tn.waitfor(/\[\xA9\x49\xA5\x73\xBE\xB9\]#{AnsiSetDisplayAttr}.+#{AnsiCursorHome}\Z/){ |s|  } #print(s)
 	tn.print('s')
-	tn.waitfor(/\):(?>\s*)#{AnsiSetDisplayAttr}(?>\s*)#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s| print(s) }
+	tn.waitfor(/\):(?>\s*)#{AnsiSetDisplayAttr}(?>\s*)#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s|  } #print(s)
 	lines = tn.cmd( "String" => board_name, "Match" => /(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/ ) do |s|
 		print(s)
 	end
@@ -57,20 +58,20 @@ def jump_board(tn, board_name)
 	end
 
 	lines = tn.cmd("String" => "", "Match" => /#{ArticleList}\Z/) do |s|
-		print(s)
+		#print(s)
 	end
 	return lines
 end
 
 def gsub_ansi_by_space(s)
 	begin
-	s.gsub!(/\x1B\[(?:(?>(?>(?>\d+;)*\d+)?)m|(?>(?>\d+;\d+)?)H|K)/) do |m|
-		if m[m.size-1].chr == 'K'
-			"\n"
-		else
-			" "
+		s.gsub!(/\x1B\[(?:(?>(?>(?>\d+;)*\d+)?)m|(?>(?>\d+;\d+)?)H|K)/) do |m|
+			if m[m.size-1].chr == 'K'
+				"\n"
+			else
+				" "
+			end
 		end
-	end
 	rescue
 		puts "\n----gsub_ansi_by_space erro: ---\n #{s} \n"
 	end
@@ -78,45 +79,76 @@ end
 
 def get_article_list(s)
 	list = []
-	s.scan(/
-	# 文章ID
-	(?>\s*)(\d+)
-	# 推文狀態
-	\s+(\+|.|\~|X|x|S|s|\x580)
-	# 推文數量
-	(?>\s*)(\xC3\x7A|\+\xC3\x7A|s\xC3\x7A|S\xC3\x7A|\s*\d*|' ')
-	# 日期
-	(?>\s*)(?>\s*)(\d*\/\d+)
-	# 帳號
-	(?>\s*)(?!(?>\d+\s))(\w{2,})\s+
-	# 文章標記
-	(?>\s*)(\xA1\xBC|R:|\xC2\xE0)
-	# 分類
-	(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
-	# 主題
-	(?>\s*)(.*)
-	/x){
-		|articleID, pushStatus, pushCount, date, author, mark, type, title|	
-		fullLIst = articleID + ' ' + pushStatus + ' ' + pushCount + ' ' + date + ' ' + 	author + ' ' + mark + ' ' + type + ' ' + title
-		list.push(
-		"fullLIst"=> big5_2_utf8(fullLIst),
-		"articleID"=> articleID, 
-		"pushStatus"=> big5_2_utf8(pushStatus), 
-		"pushCount"=> big5_2_utf8(pushCount), 
-		"date"=> date, 
-		"author"=> big5_2_utf8(author),
-		"mark"=> big5_2_utf8(mark), 
-		"type"=> big5_2_utf8(type), 
-		"title"=> big5_2_utf8(mine_checker(title.gsub(/★.*|\xA4\xBD\xA7\x69.*/,'')))
-		)
-	}
-	return list 
+	begin
+		s.scan(/
+		# 文章ID
+		(?>\s*)(\d*)
+		# 推文狀態
+		\s+(\+|.|\~|X|x|S|s|\x580)
+		# 推文數量
+		(?>\s*)(\xC3\x7A|\+\xC3\x7A|s\xC3\x7A|S\xC3\x7A|\s*\d*|' ')
+		# 日期
+		(?>\s*)(?>\s*)(\d+\/\d+)
+		# 帳號
+		(?>\s*)(?!(?>\d+\s))(\w{2,})\s+
+		# 文章標記
+		(?>\s*)(\xA1\xBC|R:|\xC2\xE0)
+		# 分類
+		(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
+		# 主題
+		(?>\s*)(.*)
+		/x){
+			|articleID, pushStatus, pushCount, date, author, mark, type, title|
+			title = title.gsub(/\xA1\xB9.*/,'')
+			fullLIst = articleID + ' ' + pushStatus + ' ' + pushCount + ' ' + date + ' ' + 	author + ' ' + mark + ' ' + type + ' ' + title
+
+			list.push(
+			"fullLIst"=> big5_2_utf8(fullLIst),
+			"articleID"=> articleID,
+			"pushStatus"=> big5_2_utf8(pushStatus),
+			"pushCount"=> big5_2_utf8(pushCount),
+			"date"=> date,
+			"author"=> big5_2_utf8(author),
+			"mark"=> big5_2_utf8(mark),
+			"type"=> big5_2_utf8(type),
+			"title"=> big5_2_utf8(mine_checker(title))
+			)
+		}
+	rescue
+		puts 'get_article_list error'
+	ensure
+		return list
+	end
+end
+
+def down(tn)
+    tn.print("j")
+end
+
+def up(tn)
+    tn.print("k")
+end
+
+def top(tn)
+    tn.print("\e[1~")
+end
+
+def bottom(tn)
+    tn.print("\e[4~")
+end
+
+def page_up(tn)
+    tn.print("\e[5~")
+end
+
+def page_down(tn)
+    tn.print("\e[6~")
 end
 
 def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
 	begin
-	ic = Iconv.new("utf-8//IGNORE","big5")
-	data = ic.iconv(data.to_s)
+		ic = Iconv.new("utf-8//IGNORE","big5")
+		data = ic.iconv(data.to_s)
 	rescue
 		pute "\n iconv error \n"
 	ensure
@@ -128,22 +160,6 @@ def mine_checker(data)
 	return data.delete("\\\\").to_s.gsub(/"/, "'")
 end
 
-def keep_check_board(tn)
-	sleep(1)
-	tn.print("b")
-	sleep(1)
-	tn.print("\n")
-	sleep(1)
-
-	result = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| print(s) }
-	result = gsub_ansi_by_space(result)
-	result = line_me(result)
-	puts result
-	arr = get_article_list(result)
-	dump_json(arr)
-	tn.print("\e[4~")
-end
-
 def now_time()
 	time = Time.new
 	return now_time = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -151,10 +167,15 @@ end
 
 def dump_json(arr)
 	json = JSON.generate(arr)
-	pp arr
-	puts JSON.pretty_generate(arr)
+	#pp arr
+	#puts JSON.pretty_generate(arr)
 	puts "\n--------------------\nCount: #{arr.count}  at #{now_time()} \n--------------------\n"
-	log(json, $json_opt_path)
+	if arr.count >= 17
+		$pre_result = json
+		log(json, $json_opt_path)
+	else
+		log($pre_result, $json_opt_path)
+	end
 end
 
 def log(log, file_name="index.html")
@@ -162,9 +183,25 @@ def log(log, file_name="index.html")
 end
 
 def line_me(s)
-	s.gsub!(/\d\d\d\d\d/) do |m|
+	s.gsub!(/[^\w*]\d{5,}[^\w*]/) do |m|
 		"\n#{m}"
 	end
+end
+
+def keep_check_board(tn)
+	sleep(1)
+	tn.print("b")
+	sleep(1)
+	tn.print("\n")
+	sleep(1)
+
+	result = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| } #print(s)
+	result = gsub_ansi_by_space(result)
+	result = line_me(result)
+	#puts result
+	arr = get_article_list(result)
+	dump_json(arr)
+	bottom(tn)	#to bottom
 end
 
 def demo_list()
