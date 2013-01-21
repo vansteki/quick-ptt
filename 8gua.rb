@@ -20,6 +20,7 @@ $host = 'ptt.cc'
 $board_name = 'Gossiping'
 $json_opt_path = 'C:\xampp-portable\htdocs\index.html'
 $pre_result = ''
+$iconv_fail = 0
 
 def connect(port, time_out, wait_time, host)
 	tn = Net::Telnet.new(
@@ -129,8 +130,10 @@ def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
 	begin
 		ic = Iconv.new("utf-8//IGNORE","big5")
 		data = ic.iconv(data.to_s)
+		$iconv_fail = 0
 	rescue
-		pute "\n iconv error \n"
+		puts "\n iconv error \n"
+		$iconv_fail = 1
 	ensure
 		return  data
 	end
@@ -150,7 +153,7 @@ def dump_json(arr)
 	#pp arr
 	#puts JSON.pretty_generate(arr)
 	puts "\n--------------------\nCount: #{arr.count}  at #{now_time()} \n--------------------\n"
-	if arr.count >= 17
+	if arr.count >= 17 && $iconv_fail == 0
 		$pre_result = json
 		log(json, $json_opt_path)
 	else
