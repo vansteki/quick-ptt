@@ -15,6 +15,8 @@ PressAnyKeyToContinue2 = "\\[#{PressAnyKey}\\](?>\\s*)#{AnsiSetDisplayAttr}"
 # (b)進板畫面
 ArticleList = '\(b\)' + "#{AnsiSetDisplayAttr}" + '\xB6\x69\xAA\x4F\xB5\x65\xAD\xB1\s*' + "#{AnsiSetDisplayAttr}#{AnsiCursorHome}"
 Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
+RepeatLogin = "\xAD\xAB\xBD\xC6\xB5\x6E\xA4\x4A.*\[Y\/n\]"
+
 
 $host = 'ptt.cc'
 $board_name = 'Gossiping'
@@ -32,21 +34,39 @@ def connect(port, time_out, wait_time, host)
 	return tn
 end
 
+
+$check_relogin
 def login(tn, id, password)
 	tn.waitfor(/guest.+new(?>[^:]+):(?>\s*)#{AnsiSetDisplayAttr}#{WaitForInput}\Z/){ |s| print(s) }
 	# 帳號
 	tn.cmd("String" => id, "Match" => /\xB1\x4B\xBD\x58:(?>\s*)\Z/){ |s| print(s) }
 	# 密碼, 按任意鍵繼續
 	tn.cmd("String" => password,
-	"Match" => /#{PressAnyKeyToContinue}\Z/){ |s| print(s) }
+	"Match" => /#{PressAnyKeyToContinue}\Z/){ |s| 
+	print(s)
+		if $check_relogin == 'yes'
+			kick_self_off(tn)
+		end
+	} #print(s)
 	tn.print("\n")
+	# check_repeat_id(tn)
 end
+
+def kick_self_off(tn)
+	if tn.waitfor(/.*\xAA\x60\xB7\x4E\:.*/){ |s| print(s) }
+		tn.print('Y')
+		tn.print("\n")
+		tn.print("\n")
+		jump_board(tn, $board_name)
+		keep_check_board(tn)
+	end
+end	
 
 #進入某板(等於從主畫面按's')
 def jump_board(tn, board_name)
-
+	puts "\n jump_board() \n"
 	# [呼叫器]
-	tn.waitfor(/\[\xA9\x49\xA5\x73\xBE\xB9\]#{AnsiSetDisplayAttr}.+#{AnsiCursorHome}\Z/){ |s|  } #print(s)
+	tn.waitfor(/(\[\xA9\x49\xA5\x73\xBE\xB9\])#{AnsiSetDisplayAttr}.+#{AnsiCursorHome}\Z/){ |s|  } #print(s)
 	tn.print('s')
 	tn.waitfor(/\):(?>\s*)#{AnsiSetDisplayAttr}(?>\s*)#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s|  } #print(s)
 	lines = tn.cmd( "String" => board_name, "Match" => /(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/ ) do |s|
@@ -123,7 +143,7 @@ def get_article_list(s)
 end
 
 def bottom(tn)
-    tn.print("\e[4~")
+	tn.print("\e[4~")
 end
 
 def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
@@ -153,7 +173,7 @@ def dump_json(arr)
 	#pp arr
 	#puts JSON.pretty_generate(arr)
 	puts "\n--------------------\nCount: #{arr.count}  at #{now_time()} \n--------------------\n"
-	if arr.count >= 17 && $iconv_fail == 0
+	if arr.count >= 16 && arr.count <= 20 &&$iconv_fail == 0
 		$pre_result = json
 		log(json, $json_opt_path)
 	else
@@ -172,6 +192,7 @@ def line_me(s)
 end
 
 def keep_check_board(tn)
+while (1)
 	sleep(1)
 	tn.print("b")
 	sleep(1)
@@ -186,19 +207,46 @@ def keep_check_board(tn)
 	dump_json(arr)
 	bottom(tn)	#to bottom
 end
+end
 
-def demo_list()
-	tn = connect(23, 10, 1, $host)
-	login(tn, ARGV[0], ARGV[1])
-	result = jump_board(tn, $board_name)
-	result = gsub_ansi_by_space(result)
-	result = line_me(result)
-	puts result
-	arr = get_article_list(result)
-	dump_json(arr)
+def check_if_repeat_login(tn)
+	tn.waitfor	
+end
 
-	while (1)
+def crawer_ini()
+	begin
+		$check_relogin = 'no'
+		tn = connect(23, 10, 1, $host)
+		login(tn, ARGV[0], ARGV[1])
+		result = jump_board(tn, $board_name)
+		result = gsub_ansi_by_space(result)
+		result = line_me(result)
+		puts result
+		arr = get_article_list(result)
+		dump_json(arr)
 		keep_check_board(tn)
+	rescue
+		puts "\n faild \n"
+		crawer_retry_mode()
+	end
+end
+
+def crawer_retry_mode()
+	begin
+		$check_relogin = 'yes'
+		tn = connect(23, 10, 1, $host)
+		login(tn, ARGV[0], ARGV[1])
+		result = jump_board(tn, $board_name)
+		result = gsub_ansi_by_space(result)
+		result = line_me(result)
+		puts result
+		arr = get_article_list(result)
+		dump_json(arr)
+		keep_check_board(tn)
+	rescue
+		sleep(10)
+		puts "\n wait time out \n"
+		retry
 	end
 end
 
@@ -208,5 +256,5 @@ if ARGV.size != 2 then
 end
 
 begin
-	demo_list()
+	crawer_ini()
 end
