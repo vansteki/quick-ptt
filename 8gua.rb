@@ -37,19 +37,19 @@ end
 
 $check_relogin
 def login(tn, id, password)
+
 	tn.waitfor(/guest.+new(?>[^:]+):(?>\s*)#{AnsiSetDisplayAttr}#{WaitForInput}\Z/){ |s| print(s) }
 	# 帳號
 	tn.cmd("String" => id, "Match" => /\xB1\x4B\xBD\x58:(?>\s*)\Z/){ |s| print(s) }
 	# 密碼, 按任意鍵繼續
 	tn.cmd("String" => password,
-	"Match" => /#{PressAnyKeyToContinue}\Z/){ |s| 
-	print(s)
+	"Match" => /#{PressAnyKeyToContinue}\Z/){ |s|
+		print(s)
 		if $check_relogin == 'yes'
 			kick_self_off(tn)
 		end
-	} #print(s)
+	}
 	tn.print("\n")
-	# check_repeat_id(tn)
 end
 
 def kick_self_off(tn)
@@ -60,7 +60,7 @@ def kick_self_off(tn)
 		jump_board(tn, $board_name)
 		keep_check_board(tn)
 	end
-end	
+end
 
 #進入某板(等於從主畫面按's')
 def jump_board(tn, board_name)
@@ -192,25 +192,21 @@ def line_me(s)
 end
 
 def keep_check_board(tn)
-while (1)
-	sleep(1)
-	tn.print("b")
-	sleep(1)
-	tn.print("\n")
-	sleep(1)
+	while (1)
+		sleep(1)
+		tn.print("b")
+		sleep(1)
+		tn.print("\n")
+		sleep(1)
 
-	result = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| } #print(s)
-	result = gsub_ansi_by_space(result)
-	result = line_me(result)
-	#puts result
-	arr = get_article_list(result)
-	dump_json(arr)
-	bottom(tn)	#to bottom
-end
-end
-
-def check_if_repeat_login(tn)
-	tn.waitfor	
+		result = tn.waitfor(/(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/){ |s| } #print(s)
+		result = gsub_ansi_by_space(result)
+		result = line_me(result)
+		#puts result
+		arr = get_article_list(result)
+		dump_json(arr)
+		bottom(tn)	#to bottom
+	end
 end
 
 def crawer_ini()
@@ -226,7 +222,7 @@ def crawer_ini()
 		dump_json(arr)
 		keep_check_board(tn)
 	rescue
-		puts "\n faild \n"
+		puts "\n crawer_ini faild \n"
 		crawer_retry_mode()
 	end
 end
@@ -244,8 +240,8 @@ def crawer_retry_mode()
 		dump_json(arr)
 		keep_check_board(tn)
 	rescue
-		sleep(10)
-		puts "\n wait time out \n"
+		sleep(3)
+		puts "\n retry faild \n"
 		retry
 	end
 end
