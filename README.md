@@ -39,7 +39,7 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
 ##Introduction
 
-A crawer use Ruby net/telnet to fetch article list of board 'Gossiping' of PTT.CC. (4Chat.com of Taiwan)
+A crawler use Ruby net/telnet to fetch article list of board 'Gossiping' of PTT.CC. (4Chat.com of Taiwan)
 
 JSON outputed. 
 
