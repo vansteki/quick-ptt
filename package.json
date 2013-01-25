@@ -1,0 +1,12 @@
+{
+  "name": "8gua API",
+  "version": "0.1.0",
+  "description": "api for 8gua",
+  "author": "vansteki <vansteki.tw@gmail.com.com>",
+  "dependencies": {
+    "hapi": "0.0.x",
+    "joi": "0.0.x",
+    "mongodb": 1.1.x
+  },
+  "engine": "node 0.8.x"
+}
