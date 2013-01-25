@@ -15,8 +15,6 @@ PressAnyKeyToContinue2 = "\\[#{PressAnyKey}\\](?>\\s*)#{AnsiSetDisplayAttr}"
 # (b)進板畫面
 ArticleList = '\(b\)' + "#{AnsiSetDisplayAttr}" + '\xB6\x69\xAA\x4F\xB5\x65\xAD\xB1\s*' + "#{AnsiSetDisplayAttr}#{AnsiCursorHome}"
 Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
-RepeatLogin = "\xAD\xAB\xBD\xC6\xB5\x6E\xA4\x4A.*\[Y\/n\]"
-
 
 $host = 'ptt.cc'
 $board_name = 'Gossiping'
@@ -192,6 +190,7 @@ def line_me(s)
 end
 
 def keep_check_board(tn)
+	begin
 	while (1)
 		sleep(1)
 		tn.print("b")
@@ -205,7 +204,11 @@ def keep_check_board(tn)
 		#puts result
 		arr = get_article_list(result)
 		dump_json(arr)
-		bottom(tn)	#to bottom
+		bottom(tn)
+	end
+	rescue
+		puts "keep check board faild"
+		crawer_retry_mode()
 	end
 end
 
