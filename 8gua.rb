@@ -113,7 +113,7 @@ def get_article_list(s)
 		# 文章標記
 		(?>\s*)(\xA1\xBC|R:|\xC2\xE0)
 		# 分類
-		(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])
+		(?>\s*)(\[\S*[^\xA4\xBD\xA7\x69]\S*\])\s+
 		# 主題
 		(?>\s*)(.*)
 		/x){
