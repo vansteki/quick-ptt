@@ -1,8 +1,11 @@
-require 'rubygems'
+class Ptt
+
+require 'rubygems' unless defined?(Gem)
 require 'json'
 require 'net/telnet'
 require 'pp'
 require 'iconv'
+require 'forever'
 
 AnsiSetDisplayAttr = '\x1B\[(?>(?>(?>\d+;)*\d+)?)m'
 WaitForInput =  '(?>\s+)(?>\x08+)'
@@ -17,8 +20,9 @@ ArticleList = '\(b\)' + "#{AnsiSetDisplayAttr}" + '\xB6\x69\xAA\x4F\xB5\x65\xAD\
 Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 
 $host = 'ptt.cc'
-$board_name = 'Gossiping'
-$json_opt_path = 'C:\xampp-portable\htdocs\index.html'
+ARGV[2] ||= "Gossiping"
+$board_name = ARGV[2]
+$json_opt_path = "/var/www/8gua/#{ARGV[2]}.html"
 $pre_result = ''
 $iconv_fail = 0
 
@@ -105,7 +109,7 @@ def get_article_list(s)
 		# 推文狀態
 		\s+(\+|.|\~|X|x|S|s|\x580)
 		# 推文數量
-		(?>\s*)(\xC3\x7A|\+\xC3\x7A|s\xC3\x7A|S\xC3\x7A|\s*\d*|' ')
+		\s*[^\xA1\xB9](?>\s*)(\xC3\x7A|\+\xC3\x7A|s\xC3\x7A|S\xC3\x7A|\s*\d*|' ')
 		# 日期
 		(?>\s*)(?>\s*)(\d+\/\d+)
 		# 帳號
@@ -130,7 +134,8 @@ def get_article_list(s)
 			"author"=> big5_2_utf8(author),
 			"mark"=> big5_2_utf8(mark),
 			"type"=> big5_2_utf8(type),
-			"title"=> big5_2_utf8(title)
+			"title"=> big5_2_utf8(title),
+			"createTime" => now_time
 			)
 		}
 	rescue
@@ -150,7 +155,8 @@ def big5_2_utf8(data) #@!!! Iconv::InvalidCharacter
 		data = ic.iconv(data.to_s)
 		$iconv_fail = 0
 	rescue
-		puts "\n iconv error \n"
+		puts "\n iconv error #{data}\n"
+		return "iconv error"
 		$iconv_fail = 1
 	ensure
 		return  data
@@ -171,7 +177,7 @@ def dump_json(arr)
 	#pp arr
 	#puts JSON.pretty_generate(arr)
 	puts "\n--------------------\nCount: #{arr.count}  at #{now_time()} \n--------------------\n"
-	if arr.count >= 16 && arr.count <= 20 &&$iconv_fail == 0
+	if arr.count >= 15 && arr.count <= 20 && $iconv_fail == 0
 		$pre_result = json
 		log(json, $json_opt_path)
 	else
@@ -190,8 +196,8 @@ def line_me(s)
 end
 
 def keep_check_board(tn)
-	begin
 	while (1)
+	begin
 		sleep(1)
 		tn.print("b")
 		sleep(1)
@@ -205,15 +211,16 @@ def keep_check_board(tn)
 		arr = get_article_list(result)
 		dump_json(arr)
 		bottom(tn)
-	end
 	rescue
 		puts "keep check board faild"
 		crawer_retry_mode()
+	end
 	end
 end
 
 def crawer_ini()
 	begin
+		hasInput()
 		$check_relogin = 'no'
 		tn = connect(23, 10, 1, $host)
 		login(tn, ARGV[0], ARGV[1])
@@ -232,6 +239,7 @@ end
 
 def crawer_retry_mode()
 	begin
+		hasInput()
 		$check_relogin = 'yes'
 		tn = connect(23, 10, 1, $host)
 		login(tn, ARGV[0], ARGV[1])
@@ -249,11 +257,11 @@ def crawer_retry_mode()
 	end
 end
 
-if ARGV.size != 2 then
-	print("8gua.rb ID PASSWORD\n")
-	exit
+def hasInput()
+	if ARGV.size <=1   then
+		print("8gua.rb ID PASSWORD\n")
+		exit
+	end
 end
 
-begin
-	crawer_ini()
-end
+end #endcalss
