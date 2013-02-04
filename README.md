@@ -15,7 +15,8 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 ##Usage
     #ruby daemon.rb [PTT ID] [PTT PASS] [board name(optional, default: Gossiping)]
     EX: 
-        ruby daemon.rb guest guest C_Chat  #let's fetch C_Chat board :) 
+        #let's fetch board "C_Chat" :) 
+        ruby daemon.rb guest guest C_Chat  
 
         then you can see something like below
         --------------------
