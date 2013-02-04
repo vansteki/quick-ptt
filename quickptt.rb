@@ -5,7 +5,6 @@ require 'json'
 require 'net/telnet'
 require 'pp'
 require 'iconv'
-require 'forever'
 
 AnsiSetDisplayAttr = '\x1B\[(?>(?>(?>\d+;)*\d+)?)m'
 WaitForInput =  '(?>\s+)(?>\x08+)'
@@ -22,7 +21,7 @@ Signature = '\xC3\xB1\xA6\x57\xC0\xC9\.(?>\d+).+' + "#{AnsiCursorHome}"
 $host = 'ptt.cc'
 ARGV[2] ||= "Gossiping"
 $board_name = ARGV[2]
-$json_opt_path = "/var/www/8gua/#{ARGV[2]}.html"
+$json_opt_path = "/var/www/quick-ptt/#{ARGV[2]}.html"
 $pre_result = ''
 $iconv_fail = 0
 
@@ -220,7 +219,6 @@ end
 
 def crawer_ini()
 	begin
-		hasInput()
 		$check_relogin = 'no'
 		tn = connect(23, 10, 1, $host)
 		login(tn, ARGV[0], ARGV[1])
@@ -231,15 +229,15 @@ def crawer_ini()
 		arr = get_article_list(result)
 		dump_json(arr)
 		keep_check_board(tn)
-	rescue
-		puts "\n crawer_ini faild \n"
+	rescue Exception => e
+  		puts e.message  
+  		puts e.backtrace.inspect
 		crawer_retry_mode()
 	end
 end
 
 def crawer_retry_mode()
 	begin
-		hasInput()
 		$check_relogin = 'yes'
 		tn = connect(23, 10, 1, $host)
 		login(tn, ARGV[0], ARGV[1])
@@ -250,15 +248,16 @@ def crawer_retry_mode()
 		arr = get_article_list(result)
 		dump_json(arr)
 		keep_check_board(tn)
-	rescue
+	rescue Exception => e
 		sleep(3)
-		puts "\n retry faild \n"
+		puts e.message  
+  		puts e.backtrace.inspect
 		retry
 	end
 end
 
 def hasInput()
-	if ARGV.size <=1   then
+	if !ARGV[0] || !ARGV[1] then
 		print("8gua.rb ID PASSWORD\n")
 		exit
 	end
