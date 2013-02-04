@@ -13,25 +13,27 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
     gem install iconv
 
 ##Usage
-    ruby daemon.rb [PTT ID] [PTT PASS] [board name(optional, default: Gossiping)]
-    ruby daemon.rb guest guest C_Chat  #let's fetch C_Chat board :) 
+    #ruby daemon.rb [PTT ID] [PTT PASS] [board name(optional, default: Gossiping)]
+    EX: 
+        ruby daemon.rb guest guest C_Chat  #let's fetch C_Chat board :) 
 
-    then you can see something like below
-    --------------------
-    Count: 18  at 2013-02-04 17:22:25
-    --------------------
+        then you can see something like below
+        --------------------
+        Count: 18  at 2013-02-04 17:22:25
+        --------------------
+    
+        --------------------
+        Count: 18  at 2013-02-04 17:22:29
+        --------------------
+        ...
+   
 
-    --------------------
-    Count: 18  at 2013-02-04 17:22:29
-    --------------------
-    ...
-    
-    view result
-    http://127.0.0.1/quick-ptt/[board name].html
-    
-    http://127.0.0.1/quick-ptt/Gossiping.html
-    or
-    http://127.0.0.1/quick-ptt/C_Chat.html
+###view result
+    #http://127.0.0.1/quick-ptt/[board name].html
+    EX:
+        http://127.0.0.1/quick-ptt/Gossiping.html
+        or
+        http://127.0.0.1/quick-ptt/C_Chat.html
     
     
 
