@@ -1,65 +1,37 @@
-##簡介
-
-demo site: [http://djw.twbbs.org/8gua/] (http://djw.twbbs.org/8gua/)
-
-這是一隻用來爬PTT 八卦板的爬蟲，此為簡易版，目前能擷取文章列表(輸出格式為JSON)。
-
-順便一提，這位大大的範例帶給我不少幫助，想玩Ruby + telnet 的人一定要來看看　ＸＤ
-
-http://godspeedlee.myweb.hinet.net/
-
-##Ruby 版本
-ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
-  
-##使用方法
-  
-    gem install json
-  
-    ruby 8gua.rb [PTT帳號] [密碼]
-
-登入成功後就會開始跳至八卦板爬文了! enjoy it :)
-
-###其他設定
-
-    $host             主機IP或名稱
-    $board_name       板名(英文)，預設為 Gossiping　
-    $json_opt_path    輸出檔的路徑及檔名，若沒指定則預設值為 ./index.html　
-
-
-##注意事項!
-
-###使用Ruby1.9.X 要注意檔案utf8的問題 和 [正規表示要修改] (http://goo.gl/FQr2W)
-
-  檔案utf8的問題: 請在檔案最上方插入此行　
-     
-    #encoding: utf-8
-
-###請勿使用本程式於非法行為，此程式僅供教學研究用途。
-
-
 ##Introduction
-
-A crawler use Ruby net/telnet to fetch article list of board 'Gossiping' of PTT.CC. (4Chat.com of Taiwan)
+A crawler use Ruby net/telnet to fetch article list of board  of PTT.CC. (4Chat.com of Taiwan)
 
 JSON outputed. 
 
-##Ruby Version
+[demo site] (http://djw.twbbs.org/quick-ptt/Gossiping.html)
 
+##Ruby Version
 ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
 
-##How to use?
-
+##Require
     gem install json
-  
-    ruby 8gua.rb [your PTT ID] [PASS]
+    gem install iconv
 
-enjoy it :)
+##Usage
+    ruby daemon.rb [PTT帳號] [密碼] [完整版名(可不輸入,預設為Gossiping)]
 
-###Config
+    then you can see something like below
+    --------------------
+    Count: 18  at 2013-02-04 17:22:25
+    --------------------
 
+    --------------------
+    Count: 18  at 2013-02-04 17:22:29
+    --------------------
+    ...
+    
+    view result
+    http://127.0.0.1/quick-ptt/Gossiping.html
+    http://127.0.0.1/quick-ptt/[完整版名].html
+
+##Config
     $host             host IP/domain name       
-    $board_name       board name (English),　default: Gossiping　
-    $json_opt_path    Output path & file name, default: ./index.html　
+    $json_opt_path    Output path and file name, default: ./index.html　
 
 ##Notice!
 
@@ -79,5 +51,6 @@ sudo gem install magic_encoding, then just call magic_encoding from the root of 
 http://goo.gl/FQr2W
 
 ####
+  
   This project is only for education and research. Do not abuse it on illegal behavior.
       
