@@ -13,7 +13,8 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
     gem install iconv
 
 ##Usage
-    ruby daemon.rb [PTT帳號] [密碼] [完整版名(可不輸入,預設為Gossiping)]
+    ruby daemon.rb [PTT ID] [PTT PASS] [board name(optional, default: Gossiping)]
+    ruby daemon.rb guest guest C_Chat  #let's fetch C_Chat board :) 
 
     then you can see something like below
     --------------------
@@ -26,8 +27,13 @@ ruby 1.8.7 (2012-02-08 patchlevel 358) [i686-linux]
     ...
     
     view result
+    http://127.0.0.1/quick-ptt/[board name].html
+    
     http://127.0.0.1/quick-ptt/Gossiping.html
-    http://127.0.0.1/quick-ptt/[完整版名].html
+    or
+    http://127.0.0.1/quick-ptt/C_Chat.html
+    
+    
 
 ##Config
     $host             host IP/domain name       
