@@ -69,7 +69,7 @@ def jump_board(tn, board_name)
 	# [呼叫器]
 	tn.waitfor(/(\[\xA9\x49\xA5\x73\xBE\xB9\])#{AnsiSetDisplayAttr}.+#{AnsiCursorHome}\Z/){ |s|  } #print(s)
 	tn.print('s')
-	tn.waitfor(/\):(?>\s*)#{AnsiSetDisplayAttr}(?>\s*)#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s|  } #print(s)
+	#tn.waitfor(/\):(?>\s*)#{AnsiSetDisplayAttr}(?>\s*)#{AnsiSetDisplayAttr}#{AnsiEraseEOL}#{AnsiCursorHome}\Z/){ |s|  } #print(s)
 	lines = tn.cmd( "String" => board_name, "Match" => /(?>#{PressAnyKeyToContinue}|#{ArticleList})\Z/ ) do |s|
 		print(s)
 	end
